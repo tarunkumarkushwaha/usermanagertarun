@@ -45,7 +45,7 @@ const EditUser = () => {
     } else {
       setIsAuthChecked(true);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (isAuthChecked && params.id) {

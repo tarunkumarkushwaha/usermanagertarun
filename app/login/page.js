@@ -26,7 +26,7 @@ export default function Login() {
     } else {
       setIsAuthChecked(true);
     }
-  }, []);
+  }, [router]);
 
   if (!isAuthChecked) {
     return <div className="flex items-center justify-center min-h-screen bg-gray-50">

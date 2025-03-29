@@ -30,7 +30,7 @@ const Users = () => {
     } else {
       setIsAuthChecked(true);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (isAuthChecked) {
