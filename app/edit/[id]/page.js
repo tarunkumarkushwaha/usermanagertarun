@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -15,6 +15,8 @@ const EditUser = () => {
   const [email, setEmail] = useState("");
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [errors, setErrors] = useState('');
+
+  let userref = useRef(null)
 
   const router = useRouter();
   const params = useParams();
@@ -59,6 +61,7 @@ const EditUser = () => {
       try {
         const response = await axios.get(`${BASE_URL}/users/${id}`);
         setFirstName(response.data.data.first_name);
+        userref.current = response.data.data.first_name
         setLastName(response.data.data.last_name);
         setEmail(response.data.data.email);
       } catch (error) {
@@ -90,7 +93,7 @@ const EditUser = () => {
         return updatedUsers;
       });
       
-      toast.success(`user ${firstName} updated`)
+      toast.success(`user ${userref.current} updated to ${firstName}`)
       router.push("/users");
     } catch (error) {
       console.error("Error updating user:", error);

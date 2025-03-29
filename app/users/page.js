@@ -13,45 +13,54 @@ const Users = () => {
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
   const BASE_URL = "https://reqres.in/api";
-
+  
   const { users, setUsers, useremail } = useContext(Context);
-
+  
   const handleLogout = () => {
     localStorage.removeItem("token");
-    toast.success(`user ${useremail} logged out`)
+    toast.success(`user ${useremail} logged out`);
     router.push("/login");
   };
-
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
-
+  
     if (!token) {
       router.push("/login");
     } else {
       setIsAuthChecked(true);
     }
   }, [router]);
-
+  
+  const fetchUsers = async () => {
+    try {
+      setUsers([]); 
+      const response = await axios.get(`${BASE_URL}/users?page=${page}`);
+      setUsers(response.data.data);
+      setTotalPages(response.data.total_pages);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+  
   useEffect(() => {
     if (isAuthChecked) {
-      const fetchUsers = async () => {
-        try {
-          if (users.length === 0) {
-            const response = await axios.get(`${BASE_URL}/users?page=${page}`);
-            setUsers(response.data.data);
-            setTotalPages(response.data.total_pages);
-            console.log("i m running")
-          } else {
-            console.log("prefetched from cache")
-            return
-          }
-        } catch (error) {
-          console.error("Error fetching users:", error);
-        }
-      };
       fetchUsers();
     }
   }, [page, isAuthChecked]);
+  
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+  
 
   if (!isAuthChecked) {
     return <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-purple-200">
@@ -153,7 +162,7 @@ const Users = () => {
           <button
             className="bg-blue-600 hover:bg-blue-500 cursor-pointer text-white py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={page === 1}
-            onClick={() => setPage(page - 1)}
+            onClick={handlePrevPage}
           >
             Previous
           </button>
@@ -161,7 +170,7 @@ const Users = () => {
           <button
             className="bg-blue-600 hover:bg-blue-500 cursor-pointer text-white py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
+            onClick={handleNextPage}
           >
             Next
           </button>
