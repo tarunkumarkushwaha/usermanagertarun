@@ -3,28 +3,59 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { Context } from '@/MyContext';
+import { useContext } from 'react';
 
 const EditUser = () => {
-  const router = useRouter();
-  const paramsPromise = useParams();
   const [id, setId] = useState(null);
-  const [editclick, seteditclick] = useState(false);
+  const [editclick, setEditClick] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [errors, setErrors] = useState('');
+
+  const router = useRouter();
+  const params = useParams();
+  const { users, setUsers } = useContext(Context);
   const BASE_URL = "https://reqres.in/api";
 
-  useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await paramsPromise;
-      setId(resolvedParams.id);
-    };
-    resolveParams();
-  }, [paramsPromise]);
+  const validate = () => {
+    let newErrors = '';
+
+    if (!firstName.trim()) newErrors = "First name is required.";
+    if (!lastName.trim()) newErrors = "Last name is required.";
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) {
+      newErrors = "Email is required.";
+    } else if (!emailRegex.test(email)) {
+      newErrors = "Enter a valid email.";
+    }
+
+    setErrors(newErrors);
+    return newErrors.length === 0;
+  };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace("/login");
+    } else {
+      setIsAuthChecked(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthChecked && params.id) {
+      setId(params.id);
+    }
+  }, [isAuthChecked, params.id]);
+
+  useEffect(() => {
+    if (!id) return;
     const fetchUser = async () => {
-      if (!id) return;
       try {
         const response = await axios.get(`${BASE_URL}/users/${id}`);
         setFirstName(response.data.data.first_name);
@@ -35,25 +66,50 @@ const EditUser = () => {
       }
     };
     fetchUser();
+    // console.log("i m running")
   }, [id]);
 
   const handleUpdate = async () => {
+    if (!validate()) {
+      toast.error(errors)
+      return
+    };
     try {
-      seteditclick(true)
+      setEditClick(true);
       await axios.put(`${BASE_URL}/users/${id}`, {
         first_name: firstName,
         last_name: lastName,
         email,
       });
-      seteditclick(false)
+      setEditClick(false);
+      setUsers((prevUsers) => {
+        const updatedUsers = prevUsers.map((user) =>
+          user.id === Number(id) ? { ...user, first_name: firstName, last_name: lastName, email } : user
+        );
+        // console.log("Updated Users:", updatedUsers);
+        return updatedUsers;
+      });
+      
+      toast.success(`user ${firstName} updated`)
       router.push("/users");
     } catch (error) {
       console.error("Error updating user:", error);
+      toast.error(error)
     }
   };
 
+  if (!isAuthChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-800"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-200 min-h-screen">
       <button
         onClick={() => router.back()}
         className="absolute top-4 left-4 cursor-pointer flex items-center justify-center rounded-full"
@@ -73,7 +129,7 @@ const EditUser = () => {
           />
         </svg>
       </button>
-      <div className="p-8 bg-gradient-to-br entry-animation w-96 from-indigo-50 to-purple-50 rounded-2xl shadow-lg">
+      <div className="p-8 entry-animation w-96 bg-white rounded-2xl shadow-lg">
         <h2 className="text-3xl font-semibold text-gray-800 mb-6">Edit User Profile</h2>
         <div className="space-y-4">
           <div>

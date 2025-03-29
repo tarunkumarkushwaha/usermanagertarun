@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Next.js User Management App by tarun
 
-## Getting Started
+live link - 
 
-First, run the development server:
+Welcome! This is a simple **Next.js** application built for a test assignment. It handle user authentication, listing users, editing their details, and deleting them. 
 
-```bash
+## Features
+- Login with **Reqres API** credentials
+- Display a paginated list of users
+- Edit user details
+- Delete users from the list
+
+## Installation
+1. **Clone the repository:**
+
+   git clone https://github.com/tarunkumarkushwaha/usermanagertarun
+   cd your-repo
+
+
+2. **Install dependencies:**
+ 
+   npm install
+
+## Running the Project
+To start the development server, run:
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then, open **http://localhost:3000** in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Authentication
+- **Test Login Credentials:**
+  - **Email:** `eve.holt@reqres.in`
+  - **Password:** `cityslicka`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API Endpoints Used
+- **Login:** `POST https://reqres.in/api/login`
+- **Get Users (Paginated):** `GET https://reqres.in/api/users?page=1`
+- **Get User by ID:** `GET https://reqres.in/api/users/{id}`
+- **Update User:** `PUT https://reqres.in/api/users/{id}`
+- **Delete User:** `DELETE https://reqres.in/api/users/{id}`
 
-## Learn More
+## Notes
+The token is stored in **localStorage** for session management.
+Dynamic Routing Used in Next.js for editing users.
 
-To learn more about Next.js, take a look at the following resources:
+Let me know if you run into any issues!
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+my portfolio - https://tarunkushwahaportfolio.netlify.app/

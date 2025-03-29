@@ -3,26 +3,71 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { Context } from '@/MyContext';
+import { useContext } from 'react';
+import { toast } from "react-toastify";
 
 const Users = () => {
-  const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
   const BASE_URL = "https://reqres.in/api";
 
+  const { users, setUsers, useremail } = useContext(Context);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    toast.success(`user ${useremail} logged out`)
+    router.push("/login");
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await axios.get(`${BASE_URL}/users?page=${page}`);
-      setUsers(response.data.data);
-      setTotalPages(response.data.total_pages);
-    };
-    fetchUsers();
-  }, [page]);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      setIsAuthChecked(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthChecked) {
+      const fetchUsers = async () => {
+        try {
+          if (users.length === 0) {
+            const response = await axios.get(`${BASE_URL}/users?page=${page}`);
+            setUsers(response.data.data);
+            setTotalPages(response.data.total_pages);
+            console.log("i m running")
+          } else {
+            console.log("prefetched from cache")
+            return
+          }
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      };
+      fetchUsers();
+    }
+  }, [page, isAuthChecked]);
+
+  if (!isAuthChecked) {
+    return <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-purple-200">
+      <div className="flex justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-800"></div>
+      </div>
+    </div>;
+  }
 
   const handleDelete = async (id) => {
     await axios.delete(`${BASE_URL}/users/${id}`);
     setUsers(users.filter(user => user.id !== id));
+    let username = users.filter(user => user.id == id)[0].first_name
+
+    // console.log(username)
+    toast.success(`user ${username} deleted`)
   };
 
   return (
@@ -50,9 +95,9 @@ const Users = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-gray-800">User Directory</h2>
           <button
-            onClick={() => router.push(`/adduser`)}
+            onClick={handleLogout}
             className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer text-white font-semibold py-2 px-4 rounded-md transition">
-            Add User
+            Logout
           </button>
         </div>
 
